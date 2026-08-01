@@ -1,19 +1,23 @@
 from flask import Blueprint
-from flask_jwt_extended import get_jwt_identity
-from middleware.auth import jwt_required_custom
 
-from controllers.auth_contoller import (
+from flask_jwt_extended import jwt_required
+
+from controllers.auth_controller import (
     register,
     login,
     profile,
+    update_profile,
+    change_password,
     forgot_password,
     reset_password
 )
+
 
 auth_bp = Blueprint(
     "auth",
     __name__
 )
+
 
 # ==========================
 # Public Routes
@@ -39,14 +43,26 @@ def reset(token):
     return reset_password(token)
 
 
+
 # ==========================
 # Protected Routes
 # ==========================
 
 @auth_bp.route("/profile", methods=["GET"])
-@jwt_required_custom
+@jwt_required()
 def get_profile():
+    return profile()
 
-    user_id = get_jwt_identity()
 
-    return profile(user_id)
+
+@auth_bp.route("/profile", methods=["PUT"])
+@jwt_required()
+def edit_profile():
+    return update_profile()
+
+
+
+@auth_bp.route("/change-password", methods=["PUT"])
+@jwt_required()
+def update_password():
+    return change_password()

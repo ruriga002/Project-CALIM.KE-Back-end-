@@ -16,7 +16,7 @@ Hello {user.full_name},
 
 Click the link below to reset your password.
 
-http://localhost:5173/reset-password/{token}
+http://127.0.0.1:5179/reset-password/{token}
 
 This link expires in one hour.
 

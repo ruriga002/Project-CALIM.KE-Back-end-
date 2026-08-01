@@ -30,5 +30,6 @@ class OrderItem(db.Model):
             "order_id": self.order_id,
             "product_id": self.product_id,
             "quantity": self.quantity,
-            "price": self.price
+            "price": self.price,
+            "product": self.product.to_dict() if self.product else None
         }

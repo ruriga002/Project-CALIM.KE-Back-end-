@@ -20,11 +20,19 @@ def get_cart():
 # POST /api/cart
 def add_to_cart():
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
     user_id = get_jwt_identity()
 
-    product = Product.query.get(data["product_id"])
+    product_id = data.get("product_id")
+    quantity = data.get("quantity", 1)
+
+    if not product_id:
+        return jsonify({
+            "message": "product_id is required."
+        }), 400
+
+    product = Product.query.get(product_id)
 
     if not product:
         return jsonify({
@@ -64,7 +72,7 @@ def update_cart(cart_id):
             "message": "Cart item not found."
         }), 404
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
     item.quantity = data.get("quantity", item.quantity)
 

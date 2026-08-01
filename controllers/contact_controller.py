@@ -6,7 +6,7 @@ from models.contact import Contact
 
 def submit_contact():
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
     required = [
         "name",

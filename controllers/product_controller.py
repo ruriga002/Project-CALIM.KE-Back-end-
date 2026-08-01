@@ -1,38 +1,52 @@
 from flask import request, jsonify
+from flask_jwt_extended import jwt_required
 
 from database.db import db
 
 from models.product import Product
 from models.collection import Collection
 
+from middleware.admin_required import admin_required
 
-# GET /api/products
+
+# ==========================
+# GET ALL PRODUCTS
+# Public
+# ==========================
 def get_products():
 
     products = Product.query.all()
 
     return jsonify({
         "products": [product.to_dict() for product in products]
-    })
+    }), 200
 
 
-# GET /api/products/<id>
+# ==========================
+# GET SINGLE PRODUCT
+# Public
+# ==========================
 def get_product(product_id):
 
     product = Product.query.get(product_id)
 
     if not product:
         return jsonify({
-            "message": "Product not found"
+            "message": "Product not found."
         }), 404
 
-    return jsonify(product.to_dict())
+    return jsonify(product.to_dict()), 200
 
 
-# POST /api/products
+# ==========================
+# CREATE PRODUCT
+# Admin Only
+# ==========================
+@jwt_required()
+@admin_required
 def create_product():
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
     required = [
         "name",
@@ -44,7 +58,9 @@ def create_product():
     ]
 
     for field in required:
-        if field not in data:
+
+        if not data.get(field):
+
             return jsonify({
                 "message": f"{field} is required."
             }), 400
@@ -52,17 +68,20 @@ def create_product():
     collection = Collection.query.get(data["collection_id"])
 
     if not collection:
+
         return jsonify({
             "message": "Collection not found."
         }), 404
 
     product = Product(
+
         name=data["name"],
         description=data["description"],
         price=data["price"],
         stock=data["stock"],
         image=data["image"],
         collection_id=data["collection_id"]
+
     )
 
     db.session.add(product)
@@ -74,17 +93,33 @@ def create_product():
     }), 201
 
 
-# PUT /api/products/<id>
+# ==========================
+# UPDATE PRODUCT
+# Admin Only
+# ==========================
+@jwt_required()
+@admin_required
 def update_product(product_id):
 
     product = Product.query.get(product_id)
 
     if not product:
+
         return jsonify({
             "message": "Product not found."
         }), 404
 
-    data = request.get_json()
+    data = request.get_json() or {}
+
+    if "collection_id" in data:
+
+        collection = Collection.query.get(data["collection_id"])
+
+        if not collection:
+
+            return jsonify({
+                "message": "Collection not found."
+            }), 404
 
     product.name = data.get("name", product.name)
     product.description = data.get("description", product.description)
@@ -101,15 +136,21 @@ def update_product(product_id):
     return jsonify({
         "message": "Product updated successfully.",
         "product": product.to_dict()
-    })
+    }), 200
 
 
-# DELETE /api/products/<id>
+# ==========================
+# DELETE PRODUCT
+# Admin Only
+# ==========================
+@jwt_required()
+@admin_required
 def delete_product(product_id):
 
     product = Product.query.get(product_id)
 
     if not product:
+
         return jsonify({
             "message": "Product not found."
         }), 404
@@ -119,4 +160,4 @@ def delete_product(product_id):
 
     return jsonify({
         "message": "Product deleted successfully."
-    })
+    }), 200

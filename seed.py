@@ -35,6 +35,7 @@ with app.app_context():
     )
 
     db.session.add_all([admin, customer])
+    db.session.commit()
 
     print("Creating collections...")
 
@@ -60,40 +61,43 @@ with app.app_context():
     )
 
     db.session.add_all([hoodies, tshirts, caps])
-
     db.session.commit()
 
-    print("Creating visible products...")
+    print("Creating products...")
 
     products = [
+
         Product(
             name="CALIM Beanie",
             description="Soft custom beanie with a premium finish.",
-            price=1500,
+            price=3500,
             stock=25,
-            image="https://images.unsplash.com/photo-1576871337632-b9aef4c17ab9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmVhbmllcyUyMHdpdGglMjByaXZldHN8ZW58MHx8MHx8fDA%3D",
+            image="https://images.unsplash.com/photo-1576871337632-b9aef4c17ab9?w=500&auto=format&fit=crop&q=60",
             collection_id=hoodies.id
         ),
-        Product(
-            name="CALIM Jeans",
-            description="Custom made jeans for a perfect fit.",
-            price=5000,
-            stock=40,
-            image="https://images.unsplash.com/photo-1697678207628-6758ecf9a2cc?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGN1c3RvbSUyMGJhZ2d5JTIwamVhbnN8ZW58MHx8MHx8fDA%3D",
-            collection_id=tshirts.id
-        ),
+
         Product(
             name="CALIM Leather Jacket",
-            description="A genuine leather jacket for all styling options.",
-            price=2000,
+            description="100% genuine leather jacket.",
+            price=5800,
+            stock=40,
+            image="https://images.unsplash.com/photo-1623854156816-4c4fc355ffc7?w=500&auto=format&fit=crop&q=60",
+            collection_id=tshirts.id
+        ),
+
+        Product(
+            name="CALIM Custom Jeans",
+            description="Custom jeans with CALIM logo.",
+            price=1500,
             stock=50,
-            image="https://plus.unsplash.com/premium_photo-1731950912462-9caa3905627d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Y3VzdG9tJTIwbGVhdGhlciUyMGphY2tldHxlbnwwfHwwfHx8MA%3D%3D",
+            image="https://plus.unsplash.com/premium_photo-1674828600712-7d0caab39109?w=500&auto=format&fit=crop&q=60",
             collection_id=caps.id
-        )
+        ),
+
     ]
 
     db.session.add_all(products)
-
     db.session.commit()
 
+    print("Products created successfully!")
     print("Database seeded successfully!")

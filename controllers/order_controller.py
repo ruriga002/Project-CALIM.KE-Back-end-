@@ -36,15 +36,23 @@ def get_order(order_id):
 
 def create_order():
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
     user_id = get_jwt_identity()
+
+    shipping_address = data.get("shipping_address")
+    items = data.get("items")
+
+    if not shipping_address or not isinstance(items, list) or len(items) == 0:
+        return jsonify({
+            "message": "Shipping address and at least one item are required."
+        }), 400
 
     order = Order(
         user_id=user_id,
         status="Pending",
         total_price=0,
-        shipping_address=data["shipping_address"]
+        shipping_address=shipping_address
     )
 
     db.session.add(order)
@@ -52,14 +60,19 @@ def create_order():
 
     total = 0
 
-    for item in data["items"]:
+    for item in items:
+        product_id = item.get("product_id")
+        quantity = item.get("quantity", 1)
 
-        product = Product.query.get(item["product_id"])
+        if not product_id or quantity <= 0:
+            continue
+
+        product = Product.query.get(product_id)
 
         if not product:
             continue
 
-        subtotal = product.price * item["quantity"]
+        subtotal = product.price * quantity
 
         total += subtotal
 
@@ -67,12 +80,18 @@ def create_order():
             OrderItem(
                 order_id=order.id,
                 product_id=product.id,
-                quantity=item["quantity"],
+                quantity=quantity,
                 price=product.price
             )
         )
 
     order.total_price = total
+
+    if len(order.items) == 0:
+        db.session.rollback()
+        return jsonify({
+            "message": "Order must contain at least one valid product item."
+        }), 400
 
     db.session.commit()
 
@@ -94,7 +113,7 @@ def update_order(order_id):
     if not order:
         return jsonify({"message": "Order not found."}), 404
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
     order.status = data.get("status", order.status)
 

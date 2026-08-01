@@ -98,11 +98,15 @@ class User(db.Model):
 
     def to_dict(self):
 
+        is_admin = self.role == "admin"
+
         return {
             "id": self.id,
             "full_name": self.full_name,
             "email": self.email,
             "role": self.role,
+            "is_admin": is_admin,
+            "isAdmin": is_admin,
             "phone": self.phone,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
